@@ -1,7 +1,7 @@
 //const axios = require('axios')
 //const parser = require('xml2json');
 
-const fluxRss = require('../db/models/modelRss.js');
+const fluxRss = require('../db/models/modelFlux.js');
 
 exports.getAllFlux = async (req, res, next) => {
     try {
@@ -45,23 +45,20 @@ exports.deleteFlux = async (req, res, next) => {
     }
 }
 
-exports.getArticle = async (req, res, next) => {
+exports.updateAllFlux = async (req, res, next) => {
     try {
-        //code pour récupérer tous les articles
-        const id = parseInt(req.params.id)
-        await res.status(200).send(`Récupere les articles de l'id : ${id}`)
+        // code pour mettre à jour  tous les flux rss
+        await res.status(200).send('Met à jour  tous les flux rss')
     } catch (error) {
         console.error(error);
         await res.status(500).send('Erreur serveur')
     }
 }
 
-exports.modifyArticles = async (req, res, next) => {
+exports.updateFlux = async (req, res, next) => {
     try {
-        //code pour modifier un article
-        const id = parseInt(req.params.id)
-        const idArticle = parseInt(req.params.idArticle)
-        await res.status(200).send(`Mise à jour de l'article ${idArticle} du flux ${id}`)
+        // code pour mettre à jour un flux rss
+        await res.status(200).send('Met à jour  un flux rss')
     } catch (error) {
         console.error(error);
         await res.status(500).send('Erreur serveur')
