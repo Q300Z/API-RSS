@@ -17,7 +17,7 @@ const rssItemSchema = mongoose.Schema({
   link: { type: String, required: true},
   pubDate: { type: Date },
   author: { type: String },
-  category: { type: String },
+  category: { type: mongoose.Schema.Types.Mixed },
   comments: { type: String },
   enclosure: enclosureSchema,
   source: sourceSchema,
