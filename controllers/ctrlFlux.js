@@ -41,11 +41,11 @@ exports.createFlux = async (req, res, next) => {
     //Enregistre le flux dans mongodb
     await saveFlux(jsonFlux, req.body.link);
     const articles = transformName(jsonFlux);
-    const promises = []
+    const promises = [];
     for (const i in articles) {
       promises.push(saveItems(articles[i], source));
     }
-    await Promise.all(promises)
+    await Promise.all(promises);
 
     res.status(201).json({ message: "Flux ajouté" });
   } catch (err) {
@@ -160,12 +160,11 @@ exports.updateAllFlux = async (req, res, next) => {
           const source = { title: element.title, link: element.link };
           promises.push(saveItems(newArticle, source));
           newArticles.push(newArticle);
-          console.log(newArticles.length)
+          console.log(newArticles.length);
         }
-      };
-      console.log(promises)
-      await Promise.all(promises)
-    };
+      }
+      await Promise.all(promises);
+    }
     await res
       .status(200)
       .json({ message: "Met à jour  tous les flux rss", data: newArticles });
@@ -178,7 +177,41 @@ exports.updateAllFlux = async (req, res, next) => {
 exports.updateFlux = async (req, res, next) => {
   try {
     // code pour mettre à jour un flux rss
-    await res.status(200).send("Met à jour  un flux rss");
+    const newArticles = [];
+    const promises = [];
+    const flux = await FluxRss.findById({ _id: req.params.id });
+    if (!flux) {
+      res.status(404).json({ message: "Il n'y a pas Flux !" });
+      return;
+    }
+
+    console.log(flux.link);
+    //Recupere le XML
+    const response = await axios.get(flux.link);
+    //Transforme le flux rss xml en json
+    const jsonFlux = parser.toJson(response.data, {
+      object: true,
+      alternateTextNode: true,
+      sanitize: true,
+      coerce: true,
+    });
+    //Renvoie les articles formaté
+    const articles = transformName(jsonFlux);
+
+    for (const newArticle of articles) {
+      const oldArticle = await ItemRss.findOne({ title: newArticle.title });
+
+      if (!oldArticle) {
+        const source = { title: flux.title, link: flux.link };
+        promises.push(saveItems(newArticle, source));
+        newArticles.push(newArticle);
+        console.log(newArticles.length);
+      }
+    }
+    await Promise.all(promises);
+    await res
+      .status(200)
+      .json({ message: "Met à jour  tous les flux rss", data: newArticles });
   } catch (error) {
     console.error(error);
     await res.status(500).send("Erreur serveur");
