@@ -1,34 +1,43 @@
+const { ObjectId } = require("mongodb");
 const ItemRss = require("../db/models/modelItem.js");
 
 exports.getArticle = async (req, res, next) => {
-	try {
-		//code pour récupérer tous les articles
-        const id = req.params.id;
+  try {
+    //code pour récupérer tous les articles
+    const id = req.params.id;
 
-		ItemRss.find({ source: id })
-			.then((el) => {
-				res.status(200).json(el);
-			})
-			.catch((er) => {
-				res.status(500).send("Erreur serveur " + er);
-			});
-		// await res.status(200).send(`Récupere les articles de l'id : ${id}`)
-	} catch (error) {
-		console.error(error);
-		await res.status(500).send("Erreur serveur");
-	}
+    ItemRss.find({ source: id })
+      .then((el) => {
+        res.status(200).json(el);
+      })
+      .catch((er) => {
+        res.status(500).json({ "Erreur serveur ": er });
+      });
+    // await res.status(200).send(`Récupere les articles de l'id : ${id}`)
+  } catch (error) {
+    console.error(error);
+    await res.status(500).json({ "Erreur serveur ": error });
+  }
 };
 
 exports.modifyArticles = async (req, res, next) => {
-	try {
-		//code pour modifier un article
-		const id = parseInt(req.params.id);
-		const idArticle = parseInt(req.params.idArticle);
-		await res
-			.status(200)
-			.send(`Mise à jour de l'article ${idArticle} du flux ${id}`);
-	} catch (error) {
-		console.error(error);
-		await res.status(500).send("Erreur serveur");
-	}
+  try {
+    //code pour modifier un article
+    const id = new ObjectId(req.params.id);
+    const idArticle = new ObjectId(req.params.idArticle);
+    console.log(`Mise à jour de l'article ${idArticle} du flux ${id}`);
+
+    const update = {
+      $set: { ...req.body }, // Ajouter un nouveau tag à un tableau existant
+    };
+
+    await ItemRss.findOneAndUpdate({ _id: idArticle }, update).then(() =>
+      res.status(200).json({
+        message: `Mise à jour de l'article ${idArticle} du flux ${id}`,
+      })
+    );
+  } catch (error) {
+    console.error(error);
+    await res.status(500).json({ "Erreur serveur ": error });
+  }
 };
