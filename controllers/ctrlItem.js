@@ -28,16 +28,26 @@ exports.modifyArticles = async (req, res, next) => {
     console.log(`Mise à jour de l'article ${idArticle} du flux ${id}`);
 
     const update = {
-      $set: { ...req.body }, // Ajouter un nouveau tag à un tableau existant
+      $set: {
+        ...req.body, // New value for the 'age' field
+      },
     };
 
-    await ItemRss.findOneAndUpdate({ _id: idArticle }, update).then(() =>
-      res.status(200).json({
-        message: `Mise à jour de l'article ${idArticle} du flux ${id}`,
-      })
-    );
+    await ItemRss.updateOne({ _id: idArticle }, update).then(() => {
+      let article = "";
+      ItemRss.find({ _id: idArticle }).then((el) => {
+        article = el;
+        res.status(200).json({
+          message: `Mise à jour de l'article ${idArticle} du flux ${id}`,
+          data: article,
+        });
+      });
+    });
   } catch (error) {
     console.error(error);
-    await res.status(500).json({ "Erreur serveur ": error });
+    await res.status(500).json({
+      message: "Error server",
+      data: error,
+    });
   }
 };
